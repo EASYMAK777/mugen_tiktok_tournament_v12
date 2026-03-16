@@ -16,7 +16,7 @@ import argparse
 from datetime import datetime
 
 from TikTokLive import TikTokLiveClient
-from TikTokLive.events import GiftEvent, ConnectEvent, DisconnectEvent
+from TikTokLive.events import GiftEvent, ConnectEvent, DisconnectEvent, ShareEvent
 
 # ============================================================
 # Config
@@ -29,69 +29,28 @@ LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tiktok_brid
 # Each gift maps to: command type, value, duration (frames), description
 # Common TikTok gift names (case-insensitive matching)
 GIFT_MAP = {
-    # --- Small gifts (1-10 coins) ---
-    # target: 1 = Player 1, 2 = Player 2
-    "rose":             {"cmd": "heal",      "value": 50,   "duration": 1,   "target": 1, "desc": "Heal P1"},
-    "ice cream cone":   {"cmd": "power",     "value": 500,  "duration": 1,   "target": 1, "desc": "Power boost P1"},
-    "gg":               {"cmd": "attack",    "value": 15,   "duration": 300, "target": 1, "desc": "Attack buff P1 5s"},
-    "like":             {"cmd": "heal",      "value": 50,   "duration": 1,   "target": 2, "desc": "Heal P2"},
-    "finger heart":     {"cmd": "defense",   "value": 15,   "duration": 300, "target": 2, "desc": "Defense buff P2 5s"},
-    "tiktok":           {"cmd": "speed",     "value": 10,   "duration": 300, "target": 1, "desc": "Speed buff P1 5s"},
-    "heart me":         {"cmd": "heal",      "value": 75,   "duration": 1,   "target": 1, "desc": "Small heal P1"},
-    "doughnut":         {"cmd": "power",     "value": 800,  "duration": 1,   "target": 2, "desc": "Power boost P2"},
-    "cap":              {"cmd": "attack",    "value": 10,   "duration": 180, "target": 2, "desc": "Attack buff P2 3s"},
+    # --- Like: tiny heal both players ---
+    "like":                 {"cmd": "heal",    "value": 1,    "duration": 1,    "target": 0, "points": 0,  "desc": "Heal both +1"},
 
-    # --- Medium gifts (10-100 coins) ---
-    "perfume":          {"cmd": "heal",      "value": 150,  "duration": 1,   "target": 1, "desc": "Medium heal P1"},
-    "hand heart":       {"cmd": "defense",   "value": 25,   "duration": 600, "target": 1, "desc": "Defense buff P1 10s"},
-    "love you":         {"cmd": "heal",      "value": 200,  "duration": 1,   "target": 2, "desc": "Medium heal P2"},
-    "sunglasses":       {"cmd": "attack",    "value": 25,   "duration": 600, "target": 1, "desc": "Attack buff P1 10s"},
-    "cheer you on":     {"cmd": "power",     "value": 1500, "duration": 1,   "target": 1, "desc": "Big power boost P1"},
-    "disco ball":       {"cmd": "speed",     "value": 20,   "duration": 600, "target": 2, "desc": "Speed buff P2 10s"},
-    "birthday cake":    {"cmd": "heal",      "value": 250,  "duration": 1,   "target": 2, "desc": "Large heal P2"},
-    "gamepad":          {"cmd": "attack",    "value": 30,   "duration": 600, "target": 2, "desc": "Strong attack buff P2"},
+    # --- 1 point: Heal ---
+    "rose":                 {"cmd": "heal",    "value": 100,  "duration": 1,    "target": 1, "points": 1,  "desc": "Heal P1"},
+    "gg":                   {"cmd": "heal",    "value": 100,  "duration": 1,    "target": 2, "points": 1,  "desc": "Heal P2"},
 
-    # --- Large gifts (100-1000 coins) ---
-    "drama queen":      {"cmd": "heal",      "value": 400,  "duration": 1,   "target": 1, "desc": "Big heal P1"},
-    "money gun":        {"cmd": "power",     "value": 3000, "duration": 1,   "target": 1, "desc": "Max power P1"},
-    "garland":          {"cmd": "defense",   "value": 40,   "duration": 900, "target": 2, "desc": "Defense buff P2 15s"},
-    "hat and mustache": {"cmd": "attack",    "value": 40,   "duration": 900, "target": 1, "desc": "Attack buff P1 15s"},
-    "train":            {"cmd": "all",       "value": 25,   "duration": 600, "target": 1, "desc": "All buffs P1 10s"},
-    "family":           {"cmd": "heal",      "value": 500,  "duration": 1,   "target": 2, "desc": "Huge heal P2"},
+    # --- 5 points: Buff (all buffs for 10s) ---
+    "finger heart":         {"cmd": "all",     "value": 30,   "duration": 600,  "target": 1, "points": 5,  "desc": "Buff P1 10s"},
+    "overreact":            {"cmd": "all",     "value": 30,   "duration": 600,  "target": 2, "points": 5,  "desc": "Buff P2 10s"},
 
-    # --- Premium gifts (1000+ coins) ---
-    "lion":             {"cmd": "godmode",   "value": 50,   "duration": 900, "target": 1, "desc": "GOD MODE P1 15s"},
-    "universe":         {"cmd": "godmode",   "value": 60,   "duration": 1200,"target": 1, "desc": "GOD MODE P1 20s"},
-    "rocket":           {"cmd": "all",       "value": 50,   "duration": 900, "target": 2, "desc": "All max buffs P2 15s"},
-    "interstellar":     {"cmd": "godmode",   "value": 75,   "duration": 1800,"target": 2, "desc": "GOD MODE P2 30s"},
-    "planet":           {"cmd": "heal_full", "value": 999,  "duration": 1,   "target": 1, "desc": "FULL HEAL P1"},
+    # --- 10 points: God Mode (15s) ---
+    "rosa":                 {"cmd": "godmode", "value": 50,   "duration": 900,  "target": 1, "points": 10, "desc": "GOD MODE P1 15s"},
+    "friendship necklace":  {"cmd": "godmode", "value": 50,   "duration": 900,  "target": 2, "points": 10, "desc": "GOD MODE P2 15s"},
 }
 
-# Fallback: map by coin value if gift name not recognized (defaults to P1)
-COIN_THRESHOLDS = [
-    (1,    {"cmd": "heal",      "value": 30,   "duration": 1,   "target": 1, "desc": "Tiny heal P1"}),
-    (5,    {"cmd": "heal",      "value": 75,   "duration": 1,   "target": 1, "desc": "Small heal P1"}),
-    (10,   {"cmd": "attack",    "value": 15,   "duration": 300, "target": 1, "desc": "Attack buff P1"}),
-    (50,   {"cmd": "heal",      "value": 200,  "duration": 1,   "target": 1, "desc": "Medium heal P1"}),
-    (100,  {"cmd": "defense",   "value": 30,   "duration": 600, "target": 1, "desc": "Defense buff P1"}),
-    (500,  {"cmd": "all",       "value": 25,   "duration": 600, "target": 1, "desc": "All buffs P1"}),
-    (1000, {"cmd": "heal",      "value": 500,  "duration": 1,   "target": 1, "desc": "Big heal P1"}),
-    (5000, {"cmd": "godmode",   "value": 50,   "duration": 900, "target": 1, "desc": "GOD MODE P1"}),
-]
-
-
 def get_command_for_gift(gift_name, coin_value):
-    """Look up the command for a gift by name, falling back to coin value."""
+    """Look up the command for a gift by name. Ignores unrecognized gifts."""
     key = gift_name.strip().lower()
     if key in GIFT_MAP:
         return GIFT_MAP[key]
-
-    # Fallback by coin value
-    result = COIN_THRESHOLDS[0][1]
-    for threshold, cmd in COIN_THRESHOLDS:
-        if coin_value >= threshold:
-            result = cmd
-    return result
+    return None
 
 
 def write_command(cmd_data, username, gift_name, coin_value, repeat_count):
@@ -189,11 +148,53 @@ def main():
             return
 
         cmd_data = get_command_for_gift(gift_name, coin_value)
+        if cmd_data is None:
+            log(f"  GIFT: {username} sent {gift_name} x{repeat_count or 1} ({coin_value} coins) -- IGNORED (not mapped)")
+            return
+
         write_command(cmd_data, username, gift_name, coin_value, repeat_count or 1)
 
         log(f"  GIFT: {username} sent {gift_name} x{repeat_count or 1} ({coin_value} coins)")
-        log(f"  -> {cmd_data['desc']} (cmd={cmd_data['cmd']}, val={cmd_data['value']})")
+        log(f"  -> {cmd_data['desc']} [{cmd_data['points']}pt] (cmd={cmd_data['cmd']}, val={cmd_data['value']})")
         log("")
+
+    @client.on(ShareEvent)
+    async def on_share(event: ShareEvent):
+        username = event.user.nickname if event.user else "Anonymous"
+        log(f"  SHARE: {username} shared the stream!")
+        log(f"  -> HAMMER DROP!")
+        log("")
+
+        # Write hammer command directly
+        commands = []
+        if os.path.exists(COMMANDS_FILE):
+            try:
+                with open(COMMANDS_FILE, "r") as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        commands = data
+            except (json.JSONDecodeError, IOError):
+                commands = []
+
+        command = {
+            "cmd": "hammer",
+            "value": 200,
+            "duration": 1,
+            "target": 0,
+            "from": username,
+            "gift": "share",
+            "coins": 0,
+            "count": 1,
+            "timestamp": time.time(),
+        }
+        commands.append(command)
+        commands = commands[-50:]
+
+        try:
+            with open(COMMANDS_FILE, "w") as f:
+                json.dump(commands, f, indent=2)
+        except IOError as e:
+            log(f"ERROR writing commands file: {e}")
 
     try:
         log("Starting TikTok Live listener...")

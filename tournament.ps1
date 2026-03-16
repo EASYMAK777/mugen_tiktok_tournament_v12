@@ -529,8 +529,8 @@ function Update-HtmlBracket($rounds, [int]$activeRound = -1, [int]$activeMatch =
   .match.pending { border-color: #333; opacity: 0.5; }
   .player {
     padding: 4px 8px;
-    font-size: 0.85em;
-    color: #aaa;
+    font-size: 1.05em;
+    color: #ffffff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

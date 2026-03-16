@@ -16,11 +16,11 @@ param(
 
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-# Start the TikTok offline tester in a new window
-$tiktokTest = Join-Path $projectRoot "tiktok_test.py"
-Start-Process -FilePath "python" -ArgumentList "`"$tiktokTest`"" -WorkingDirectory $projectRoot
+# Start the TikTok Live bridge in a new window
+$tiktokBridge = Join-Path $projectRoot "tiktok_bridge.py"
+Start-Process -FilePath "python" -ArgumentList "`"$tiktokBridge`"" -WorkingDirectory $projectRoot
 
-Write-Host "TikTok tester launched in separate window." -ForegroundColor Cyan
+Write-Host "TikTok Live bridge launched in separate window." -ForegroundColor Cyan
 Write-Host ""
 
 # Run the tournament in this window

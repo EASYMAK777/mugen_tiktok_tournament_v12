@@ -15,14 +15,14 @@ COMMANDS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tiktok
 
 # Quick-pick gifts for testing
 GIFTS = {
-    "1": {"cmd": "heal",      "value": 50,  "duration": 1,   "target": 1, "label": "Rose (Heal P1)"},
-    "2": {"cmd": "heal",      "value": 50,  "duration": 1,   "target": 2, "label": "Like (Heal P2)"},
-    "3": {"cmd": "power",     "value": 500, "duration": 1,   "target": 1, "label": "Power Boost P1"},
-    "4": {"cmd": "power",     "value": 500, "duration": 1,   "target": 2, "label": "Power Boost P2"},
-    "5": {"cmd": "heal_full", "value": 999, "duration": 1,   "target": 1, "label": "FULL HEAL P1"},
-    "6": {"cmd": "heal_full", "value": 999, "duration": 1,   "target": 2, "label": "FULL HEAL P2"},
-    "7": {"cmd": "godmode",   "value": 50,  "duration": 900, "target": 1, "label": "GOD MODE P1 (15s)"},
-    "8": {"cmd": "godmode",   "value": 50,  "duration": 900, "target": 2, "label": "GOD MODE P2 (15s)"},
+    "1": {"cmd": "heal",    "value": 1,   "duration": 1,   "target": 0, "label": "Like - Heal Both +1"},
+    "2": {"cmd": "heal",    "value": 100, "duration": 1,   "target": 1, "label": "Rose - Heal P1 (1pt)"},
+    "3": {"cmd": "heal",    "value": 100, "duration": 1,   "target": 2, "label": "GG - Heal P2 (1pt)"},
+    "4": {"cmd": "all",     "value": 30,  "duration": 600, "target": 1, "label": "Finger Heart - Buff P1 (5pt)"},
+    "5": {"cmd": "all",     "value": 30,  "duration": 600, "target": 2, "label": "Overreact - Buff P2 (5pt)"},
+    "6": {"cmd": "godmode", "value": 50,  "duration": 900, "target": 1, "label": "Rosa - God Mode P1 (10pt)"},
+    "7": {"cmd": "godmode", "value": 50,  "duration": 900, "target": 2, "label": "Friendship Necklace - God Mode P2 (10pt)"},
+    "8": {"cmd": "hammer", "value": 200, "duration": 1,   "target": 0, "label": "REPOST - Hammer Drop!"},
 }
 
 

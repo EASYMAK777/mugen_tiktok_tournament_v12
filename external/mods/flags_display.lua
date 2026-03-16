@@ -17,9 +17,9 @@ local p2Label = nil
 local initialized = false
 
 -- Scales
-local ORB_FLAG_SCALE = 2 -- circular flag over the orb (50% larger than original 0.65)
+local ORB_FLAG_SCALE = 4 -- circular flag over the orb (50% larger than original 0.65)
 local FLOAT_FLAG_SCALE = 2  -- flag floating above character's head
-local FLOAT_X_OFFSET = 100    -- horizontal offset (positive = right, negative = left)
+local FLOAT_X_OFFSET = 120    -- horizontal offset (positive = right, negative = left)
 local FLOAT_Y_OFFSET = 230  -- pixels above character pos (in localcoord space, negative = up)
 local LOCALCOORD_W = 500
 local LOCALCOORD_H = 240
@@ -29,10 +29,10 @@ local labelFont = nil
 -- Orb positions (where the yellow balls are in the HUD)
 -- fight.def [Face]: p1.pos=2,12  p2.pos=316,12
 -- The orb center is roughly at face pos + offset
-local P1_ORB_X = 108
-local P1_ORB_Y = 113
-local P2_ORB_X = 1150
-local P2_ORB_Y = 108
+local P1_ORB_X = 90
+local P1_ORB_Y = 180
+local P2_ORB_X = 1180
+local P2_ORB_Y = 187
 
 
 local function loadFlags()
@@ -90,15 +90,15 @@ local function initFight()
 		index = idx1,
 		code = c1.code,
 		name = c1.name,
-		orbAnim = createFlagAnim(1, idx1, ORB_FLAG_SCALE),
-		floatAnim = createFlagAnim(1, idx1, FLOAT_FLAG_SCALE),
+		orbAnim = createFlagAnim(0, idx1, ORB_FLAG_SCALE),
+		floatAnim = createFlagAnim(0, idx1, FLOAT_FLAG_SCALE),
 	}
 	p2Flag = {
 		index = idx2,
 		code = c2.code,
 		name = c2.name,
-		orbAnim = createFlagAnim(1, idx2, ORB_FLAG_SCALE),
-		floatAnim = createFlagAnim(1, idx2, FLOAT_FLAG_SCALE),
+		orbAnim = createFlagAnim(0, idx2, ORB_FLAG_SCALE),
+		floatAnim = createFlagAnim(0, idx2, FLOAT_FLAG_SCALE),
 	}
 	p1Label = createLabel(c1.code)
 	p2Label = createLabel(c2.code)

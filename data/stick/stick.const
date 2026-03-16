@@ -1,0 +1,105 @@
+[Constants]
+;-----------------------------------------------------------------------------------------
+; ###################### constants for STICK  #############################
+;-----------------------------------------------------------------------------------------
+----------------------configure------
+##1/on 0/off buttons
+#top row >>>>left to right
+showx 	 = 1
+showy	 = 1
+showz 	 = 1
+showtagsf = 1
+#bottom row >>>>left to right
+showa 	 = 1
+showb  	 = 1
+showc	 = 1
+showtagsb = 1
+#start button
+showstart =1
+;--------------button press delay 6-------------------
+
+buttondelay = 6 ; 6 frame default before button resets position
+
+;#------------------button animations------------
+;# included some colours on dif anims	
+;# white  = 43,42
+;# blue   = 45,44
+;# red    = 47,46
+;# green  = 49,48
+;# brown  = 51,50
+;# purple = 53,52
+;# orange = 55,54
+;# cyan   = 57,56
+;# yellow = 59,58
+;# pink   = 61,60
+
+#top row  >>>>left to right
+cnx   = 46
+cnxd  = 47
+cny   = 48
+cnyd  = 49
+cnz   = 50
+cnzd  = 51
+cnt1  = 52
+cnt1d = 53
+#bottom row >>>>left to right
+cna   = 40	
+cnad  = 41	
+cnb   = 42
+cnbd  = 43
+cnc   = 44
+cncd  = 45
+cnt2  = 54 
+cnt2d = 55 
+#start button
+cnst  = 56
+cnstd = 57
+
+
+
+;;;;;;;;;;;;;;;;;;;;EXAMPLE;;;;;;;;;;;;;;;;;;;;;;;
+;;; #top row  >>>>left to right
+;;; cnx   = 41	
+;;; cnxd  = 40	
+;;; cny   = 43
+;;; cnyd  = 42
+;;; cnz   = 45
+;;; cnzd  = 44
+;;; cnt1  = 47
+;;; cnt1d = 46
+;;; #bottom row >>>>left to right
+;;; cna   = 49
+;;; cnad  = 48
+;;; cnb   = 51
+;;; cnbd  = 50
+;;; cnc   = 53
+;;; cncd  = 52
+;;; cnt2  = 55
+;;; cnt2d = 54
+;;; #start button
+;;; cnst  = 57
+;;; cnstd = 56
+
+;;;;;;;;;;;;;;;;;;;;EXAMPLE;;;;;;;;;;;;;;;;;;;;;;;
+;;; #top row  >>>>left to right
+;;; cnx   = 43	
+;;; cnxd  = 42	
+;;; cny   = 45
+;;; cnyd  = 44
+;;; cnz   = 47
+;;; cnzd  = 46
+;;; cnt1  = 57
+;;; cnt1d = 56
+;;; #bottom row >>>>left to right
+;;; cna   = 43
+;;; cnad  = 42
+;;; cnb   = 45
+;;; cnbd  = 44
+;;; cnc   = 47
+;;; cncd  = 46
+;;; cnt2  = 55
+;;; cnt2d = 54
+;;; #start button
+;;; cnst  = 41
+;;; cnstd = 40
+;;; 

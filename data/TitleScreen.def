@@ -1,0 +1,178 @@
+;Dragon Ball Xenoverse 2 Mugen Screenpack
+
+[Info]
+name = "JUSMV TITLE"
+author = "BLOODBATHANIME"
+versiondate = 01,24,2024
+mugenversion = 1.1
+localcoord = 1280,720
+
+; =================================================
+[SceneDef]
+spr = system.sff
+;startscene = 0
+; =================================================
+
+[Scene 0]
+fadein.time = 90
+fadeout.time = 30
+end.time = 3800
+bg.name = BG0
+bgm = Title.mp3
+bgm.loop = 0
+bgm.volume = 255
+
+[BG0Def]
+;bgclearcolor = 0,0,0
+
+[BG0 start bg]
+type  = normal
+spriteno = 2000, 1
+start = 0,0
+mask = 1
+
+[BG0 start particles1]
+type  = normal
+spriteno = 2000, 3
+start = -263, 292
+trans = Add
+tile = 0, 1
+velocity = 0, -0.7
+mask = 1
+
+
+[BG0 start particles2]
+type  = normal
+spriteno = 2000, 0
+start = 453, 275
+trans = Add
+tile = 0, 1
+velocity = 0, -0.6
+mask = 1
+
+
+[BG0 start particles3]
+type  = normal
+spriteno = 2000, 0
+start = 203, 364
+trans = Add
+tile = 0, 1
+velocity = 0, -0.8
+mask = 1
+
+
+
+[BG0 start particles4]
+type  = normal
+spriteno = 2000, 3
+start = -61, 478
+trans = Add
+tile = 0, 1
+velocity = 0, -0.5
+mask = 1
+
+
+[BG0 start boarder]
+type  = normal
+spriteno = 2000, 2
+start = 0,0
+mask = 1
+
+
+[BG0 start startgame]
+type  = normal
+spriteno = 2000, 8
+start = 0,0
+mask = 1
+
+
+
+[BG0 start startgameanim]
+type = Anim
+start = 0,0
+mask = 1
+actionno = 2000
+
+
+
+
+[BG0 start startgameanim2]
+type = Anim
+start = -175, 531
+mask = 1
+actionno = 2001
+
+
+
+
+
+[BG0 start startgameanim3]
+type = Anim
+start = 210, 531
+mask = 1
+actionno = 2002
+
+
+
+
+
+
+[BG0 start abstract]
+type  = normal
+spriteno = 2000, 4
+start = 0,0
+mask = 1
+
+
+
+[BG0 start Sub]
+type  = normal
+spriteno = 2000, 5
+start = 0,0
+mask = 1
+
+
+
+
+[BG0 start Sub]
+type  = normal
+spriteno = 2000, 6
+start = 0,0
+mask = 1
+trans = Add
+
+
+
+
+
+[BG0 start credits]
+type  = normal
+spriteno = 2000, 7
+start = 0,0
+mask = 1
+
+
+
+; Start 
+[Begin Action 2000]
+Interpolate Blend
+2000,8, 0,0, 140, , AS59D256
+Interpolate Blend
+2000,8, 0,0, 140, , A
+
+[Begin Action 2001]
+Interpolate Scale
+Interpolate Offset
+2000,10, -27,0, 25
+Interpolate Scale
+Interpolate Offset
+2000,10, 0,0, 25, , , 1,0
+
+[Begin Action 2002]
+Interpolate Scale
+Interpolate Offset
+2000,10, 27,0, 25, H
+Interpolate Scale
+Interpolate Offset
+2000,10, 0,0, 25, H, , 1,0
+

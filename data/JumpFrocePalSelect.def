@@ -1,0 +1,12 @@
+[FNT v2]
+fntversion = 2,00
+name = "JumpFrocePalSelect"
+
+
+[Def]
+Type = bitmap
+BankType = sprite
+Size = 5,5
+Spacing = 0,0
+Offset = 0,0
+File = JumpFrocePalSelect.sff

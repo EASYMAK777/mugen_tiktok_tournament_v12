@@ -1,0 +1,12 @@
+[FNT v2]
+fntversion = 2,00
+name = "MBTL_WinnerFont"
+
+
+[Def]
+Type = bitmap
+BankType = sprite
+Size = 15,15
+Spacing = -8,18
+Offset = 0,0
+File = MBTL_WinnerFont.sff

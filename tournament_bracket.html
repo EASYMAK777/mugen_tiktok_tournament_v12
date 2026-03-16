@@ -1,0 +1,227 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="5">
+<title>IkemenGO Tournament</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a2e;
+    color: #eee;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  h1 {
+    text-align: center;
+    color: #e94560;
+    font-size: 2.2em;
+    margin-bottom: 5px;
+    text-shadow: 0 0 20px rgba(233,69,96,0.5);
+    letter-spacing: 3px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #888;
+    margin-bottom: 30px;
+    font-size: 1.1em;
+  }
+  .bracket {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    overflow-x: auto;
+    padding: 20px 10px;
+    align-items: stretch;
+  }
+  .round {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    min-width: 190px;
+    gap: 15px;
+    flex-shrink: 0;
+  }
+  .round-title {
+    text-align: center;
+    color: #e94560;
+    font-weight: bold;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e94560;
+    margin-bottom: 5px;
+  }
+  .match {
+    background: #16213e;
+    border: 2px solid #0f3460;
+    border-radius: 8px;
+    padding: 8px 12px;
+    transition: all 0.3s;
+  }
+  .match.active {
+    border-color: #f0c040;
+    box-shadow: 0 0 15px rgba(240,192,64,0.4);
+    animation: pulse 1.5s infinite;
+  }
+  .match.completed { border-color: #2ecc71; }
+  .match.pending { border-color: #333; opacity: 0.5; }
+  .player {
+    padding: 4px 8px;
+    font-size: 0.85em;
+    color: #aaa;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+  .player.winner {
+    color: #2ecc71;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(46,204,113,0.3);
+  }
+  .vs {
+    text-align: center;
+    color: #e94560;
+    font-size: 0.65em;
+    font-weight: bold;
+    padding: 2px 0;
+  }
+  .win-badge {
+    display: inline-block;
+    background: #e94560;
+    color: #fff;
+    font-size: 0.7em;
+    font-weight: bold;
+    padding: 1px 5px;
+    border-radius: 8px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+  .champion {
+    text-align: center;
+    font-size: 1.8em;
+    color: #f0c040;
+    margin-top: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 3px solid #f0c040;
+    border-radius: 12px;
+    text-shadow: 0 0 20px rgba(240,192,64,0.5);
+    animation: glow 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(240,192,64,0.4); }
+    50% { box-shadow: 0 0 25px rgba(240,192,64,0.7); }
+  }
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(240,192,64,0.3); }
+    50% { box-shadow: 0 0 40px rgba(240,192,64,0.6); }
+  }
+  .footer {
+    text-align: center;
+    color: #555;
+    margin-top: 20px;
+    font-size: 0.8em;
+  }
+</style>
+</head>
+<body>
+  <h1>JUS TOURNAMENT</h1>
+  <div class="subtitle">16-Fighter Single Elimination &bull; AI Difficulty 8/8</div>
+  <div class="bracket">
+      <div class='round'>
+        <div class='round-title'>ROUND OF 16</div>
+        <div class='match active'>
+          <div class='player'>Crono</div>
+          <div class='vs'>VS</div>
+          <div class='player'>Vegeta</div>
+        </div>
+        <div class='match pending'>
+          <div class='player'>Patrick</div>
+          <div class='vs'>VS</div>
+          <div class='player'>TC_Gojo_Satoru</div>
+        </div>
+        <div class='match pending'>
+          <div class='player'>Iguro Obanai</div>
+          <div class='vs'>VS</div>
+          <div class='player'>TC_Luffy_All_Forms</div>
+        </div>
+        <div class='match pending'>
+          <div class='player'>Serpico</div>
+          <div class='vs'>VS</div>
+          <div class='player'>Chunli</div>
+        </div>
+        <div class='match pending'>
+          <div class='player'>BatmanMumoremy</div>
+          <div class='vs'>VS</div>
+          <div class='player'>MegaMYTHOS</div>
+        </div>
+        <div class='match pending'>
+          <div class='player'>Giga Chad</div>
+          <div class='vs'>VS</div>
+          <div class='player'>Bayonetta</div>
+        </div>
+        <div class='match pending'>
+          <div class='player'>Pepsiman</div>
+          <div class='vs'>VS</div>
+          <div class='player'>TC_Mahito</div>
+        </div>
+        <div class='match pending'>
+          <div class='player'>ZeldaMYTHOS</div>
+          <div class='vs'>VS</div>
+          <div class='player'>(All-Stars) Katsuki_Bakugo</div>
+        </div>
+      </div>
+      <div class='round'>
+        <div class='round-title'>QUARTERFINALS</div>
+        <div class='match pending'>
+          <div class='player'>???</div>
+          <div class='vs'>VS</div>
+          <div class='player'>???</div>
+        </div>
+        <div class='match pending'>
+          <div class='player'>???</div>
+          <div class='vs'>VS</div>
+          <div class='player'>???</div>
+        </div>
+        <div class='match pending'>
+          <div class='player'>???</div>
+          <div class='vs'>VS</div>
+          <div class='player'>???</div>
+        </div>
+        <div class='match pending'>
+          <div class='player'>???</div>
+          <div class='vs'>VS</div>
+          <div class='player'>???</div>
+        </div>
+      </div>
+      <div class='round'>
+        <div class='round-title'>SEMIFINALS</div>
+        <div class='match pending'>
+          <div class='player'>???</div>
+          <div class='vs'>VS</div>
+          <div class='player'>???</div>
+        </div>
+        <div class='match pending'>
+          <div class='player'>???</div>
+          <div class='vs'>VS</div>
+          <div class='player'>???</div>
+        </div>
+      </div>
+      <div class='round'>
+        <div class='round-title'>GRAND FINALS</div>
+        <div class='match pending'>
+          <div class='player'>???</div>
+          <div class='vs'>VS</div>
+          <div class='player'>???</div>
+        </div>
+      </div>
+
+  </div>
+
+  <div class="footer">Auto-refreshes every 5s &bull; 2026-03-15 13:51:57</div>
+</body>
+</html>

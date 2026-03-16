@@ -1,0 +1,15 @@
+# Large asset directories
+chars/
+stages/
+sound/
+
+# Executables and binaries
+*.exe
+*.dll
+
+# Logs
+*.log
+ReShade.log*
+
+# IDE / tool files
+.claude/

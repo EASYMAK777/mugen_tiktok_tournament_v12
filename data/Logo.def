@@ -1,0 +1,52 @@
+;--------------------------------------------------------------
+
+[Info]
+name = "Logo"
+author = "Maxi Mugen"
+versiondate = 30-11-2017
+mugenversion = 1.1
+localcoord = 1280,720
+
+; -------------------------------------------------------------------
+
+[SceneDef]
+spr = Logo.sff
+startscene = 0
+
+; -------------------------------------------------------------------
+
+[Scene 0]
+fadein.time = 60
+fadeout.time = 60
+end.time = 300
+bg.name = BG0
+bgm = Logo.mp3
+bgm.loop = 0
+bgm.volume = 255
+
+[BG0Def]
+
+[BG0]
+type = normal
+spriteno = 0,0
+start = 0,0
+
+; -------------------------------------------------------------------
+
+[Scene 1]
+fadein.time = 60
+fadeout.time = 60
+end.time = 300
+bg.name = BG1
+;bgm = 
+;bgm.loop = 0
+;bgm.volume = 255
+
+[BG1Def]
+
+[BG1]
+type = normal
+spriteno = 0,1
+start = 0,0
+
+; -------------------------------------------------------------------

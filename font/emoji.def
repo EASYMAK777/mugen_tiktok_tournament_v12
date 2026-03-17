@@ -1,0 +1,12 @@
+[FNT v2]
+fntversion = 2,00
+name = "Segoe UI Emoji"
+author = "Microsoft"
+
+[Def]
+Type = truetype
+Size = 16,32
+Spacing = 1,1
+Offset = 0,0
+File = seguiemj.ttf
+Blend = 1

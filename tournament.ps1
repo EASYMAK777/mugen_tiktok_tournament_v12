@@ -69,9 +69,10 @@ Add-Type -AssemblyName System.Drawing
 function Move-ToSecondaryMonitor($process) {
     $screens = [System.Windows.Forms.Screen]::AllScreens
     if ($screens.Count -lt 2) { return }
-    $secondary = $screens | Where-Object { -not $_.Primary } | Select-Object -First 1
-    if (-not $secondary) { return }
-    $bounds = $secondary.WorkingArea
+    # Use the primary/built-in monitor for the game (TikTok captures this screen)
+    $target = $screens | Where-Object { $_.Primary } | Select-Object -First 1
+    if (-not $target) { return }
+    $bounds = $target.WorkingArea
     $x = $bounds.X + [Math]::Max(0, ($bounds.Width - 1280) / 2)
     $y = $bounds.Y + [Math]::Max(0, ($bounds.Height - 720) / 2)
     for ($i = 0; $i -lt 20; $i++) {
@@ -309,31 +310,98 @@ function Run-Match([string]$char1, [string]$char2, [string]$stage) {
     # Move window to secondary monitor if available
     Move-ToSecondaryMonitor $process
 
-    # Show prompt while game runs
+    # Auto-detect match result from Lua mod
+    $resultFile = Join-Path $projectRoot "match_result.json"
+
+    # Clear any old result
+    if (Test-Path $resultFile) { "" | Set-Content $resultFile }
+
     Write-Host ""
     Write-Host "    ================================================" -ForegroundColor DarkYellow
     Write-Host "    FIGHT IN PROGRESS! (AI: P1=$p1Ai P2=$p2Ai)" -ForegroundColor Yellow
-    Write-Host "    When the fight ends, click this window and" -ForegroundColor Yellow
-    Write-Host "    press 1 or 2. IkemenGO closes, next fight starts." -ForegroundColor Yellow
+    Write-Host "    $p1Display  vs  $p2Display" -ForegroundColor White
+    Write-Host "    Auto-detecting winner..." -ForegroundColor DarkGray
+    Write-Host "    (Press 1/2/D to override manually)" -ForegroundColor DarkGray
     Write-Host "    ================================================" -ForegroundColor DarkYellow
-    Write-Host ""
-    Write-Host "    [1] $p1Display" -ForegroundColor Cyan
-    Write-Host "    [2] $p2Display" -ForegroundColor Red
-    Write-Host "    [D] Draw" -ForegroundColor DarkGray
     Write-Host ""
 
     $result = $null
+    $maxWaitSeconds = $MaxFightMinutes * 60
+    $elapsed = 0
+
     while (-not $result) {
-        # Check if process already exited (game crashed or ended)
-        if ($process.HasExited) {
-            Write-Host "    IkemenGO has exited. Who won?" -ForegroundColor DarkYellow
+        # Check for auto-detected result from Lua mod
+        if (Test-Path $resultFile) {
+            $content = Get-Content $resultFile -Raw -ErrorAction SilentlyContinue
+            if ($content -and $content.Trim().Length -gt 2) {
+                try {
+                    $matchResult = $content | ConvertFrom-Json
+                    if ($matchResult.winner -eq "1") {
+                        $result = @{ Result = "win"; WinnerSide = 1 }
+                        Write-Host "    AUTO-DETECTED: $p1Display wins!" -ForegroundColor Green
+                    } elseif ($matchResult.winner -eq "2") {
+                        $result = @{ Result = "win"; WinnerSide = 2 }
+                        Write-Host "    AUTO-DETECTED: $p2Display wins!" -ForegroundColor Green
+                    } elseif ($matchResult.winner -eq "draw") {
+                        $result = @{ Result = "draw"; WinnerSide = 0 }
+                        Write-Host "    AUTO-DETECTED: Draw!" -ForegroundColor DarkYellow
+                    }
+                } catch {}
+            }
         }
-        $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-        switch ($key.Character) {
-            '1' { $result = @{ Result = "win"; WinnerSide = 1 } }
-            '2' { $result = @{ Result = "win"; WinnerSide = 2 } }
-            'd' { $result = @{ Result = "draw"; WinnerSide = 0 } }
-            'D' { $result = @{ Result = "draw"; WinnerSide = 0 } }
+
+        # Allow manual override via keyboard (non-blocking)
+        if (-not $result -and [Console]::KeyAvailable) {
+            $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+            switch ($key.Character) {
+                '1' { $result = @{ Result = "win"; WinnerSide = 1 }; Write-Host "    MANUAL: $p1Display wins!" -ForegroundColor Cyan }
+                '2' { $result = @{ Result = "win"; WinnerSide = 2 }; Write-Host "    MANUAL: $p2Display wins!" -ForegroundColor Cyan }
+                'd' { $result = @{ Result = "draw"; WinnerSide = 0 }; Write-Host "    MANUAL: Draw!" -ForegroundColor Cyan }
+                'D' { $result = @{ Result = "draw"; WinnerSide = 0 }; Write-Host "    MANUAL: Draw!" -ForegroundColor Cyan }
+            }
+        }
+
+        # Check if game crashed/exited without a result
+        if (-not $result -and $process.HasExited) {
+            Start-Sleep -Milliseconds 500
+            # One last check for the result file
+            if (Test-Path $resultFile) {
+                $content = Get-Content $resultFile -Raw -ErrorAction SilentlyContinue
+                if ($content -and $content.Trim().Length -gt 2) {
+                    try {
+                        $matchResult = $content | ConvertFrom-Json
+                        if ($matchResult.winner -eq "1") {
+                            $result = @{ Result = "win"; WinnerSide = 1 }
+                            Write-Host "    AUTO-DETECTED: $p1Display wins!" -ForegroundColor Green
+                        } elseif ($matchResult.winner -eq "2") {
+                            $result = @{ Result = "win"; WinnerSide = 2 }
+                            Write-Host "    AUTO-DETECTED: $p2Display wins!" -ForegroundColor Green
+                        } elseif ($matchResult.winner -eq "draw") {
+                            $result = @{ Result = "draw"; WinnerSide = 0 }
+                            Write-Host "    AUTO-DETECTED: Draw!" -ForegroundColor DarkYellow
+                        }
+                    } catch {}
+                }
+            }
+            if (-not $result) {
+                Write-Host "    IkemenGO exited with no result. Press 1/2/D:" -ForegroundColor DarkYellow
+                $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                switch ($key.Character) {
+                    '1' { $result = @{ Result = "win"; WinnerSide = 1 } }
+                    '2' { $result = @{ Result = "win"; WinnerSide = 2 } }
+                    default { $result = @{ Result = "draw"; WinnerSide = 0 } }
+                }
+            }
+        }
+
+        # Timeout safety
+        if (-not $result) {
+            Start-Sleep -Milliseconds 500
+            $elapsed += 0.5
+            if ($elapsed -ge $maxWaitSeconds) {
+                Write-Host "    TIMEOUT: Fight exceeded $MaxFightMinutes minutes. Marking as draw." -ForegroundColor DarkYellow
+                $result = @{ Result = "draw"; WinnerSide = 0 }
+            }
         }
     }
 
@@ -446,14 +514,71 @@ function Update-HtmlBracket($rounds, [int]$activeRound = -1, [int]$activeMatch =
         $roundsHtml += "      </div>`n"
     }
 
-    # Champion banner
+    # Champion victory screen
     $championHtml = ""
     $finalMatch = $rounds[-1][0]
     if ($finalMatch.Winner) {
         $champRaw = Get-CharDisplayName $finalMatch.Winner
         $champName = [System.Net.WebUtility]::HtmlEncode($champRaw)
         $champWins = if ($script:winCounts.ContainsKey($champRaw)) { $script:winCounts[$champRaw] } else { 0 }
-        $championHtml = "    <div class='champion'>&#127942; CHAMPION: $champName ($champWins-0) &#127942;</div>"
+
+        # Try to find a character portrait image
+        $champEntry = $finalMatch.Winner
+        $champFolder = if ($champEntry -match '[\\/]') { ($champEntry -split '[\\/]')[0] } else { $champEntry }
+        $champDir = Join-Path $charsDir $champFolder
+        $portraitSrc = ""
+        if (Test-Path $champDir) {
+            # Look for portrait.png, thumbnail.png, or any *portrait*.png
+            $portraitCandidates = @(
+                (Join-Path $champDir "portrait.png"),
+                (Join-Path $champDir "thumbnail.png")
+            )
+            foreach ($candidate in $portraitCandidates) {
+                if (Test-Path $candidate) {
+                    $portraitSrc = $candidate
+                    break
+                }
+            }
+            if (-not $portraitSrc) {
+                $found = Get-ChildItem -Path $champDir -Filter "*portrait*" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($found) { $portraitSrc = $found.FullName }
+            }
+            if (-not $portraitSrc) {
+                $found = Get-ChildItem -Path $champDir -Filter "thumbnail*" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($found) { $portraitSrc = $found.FullName }
+            }
+        }
+
+        $portraitImg = ""
+        if ($portraitSrc) {
+            # Convert image to base64 for embedding
+            $imgBytes = [System.IO.File]::ReadAllBytes($portraitSrc)
+            $imgBase64 = [Convert]::ToBase64String($imgBytes)
+            $portraitImg = "<img class='champ-portrait' src='data:image/png;base64,$imgBase64' alt='$champName'>"
+        }
+
+        # Convert winner background to base64
+        $bgPath = Join-Path $projectRoot "winner_bg1.png"
+        $bgBase64 = ""
+        if (Test-Path $bgPath) {
+            $bgBytes = [System.IO.File]::ReadAllBytes($bgPath)
+            $bgBase64 = [Convert]::ToBase64String($bgBytes)
+        }
+
+        $championHtml = @"
+    <div class='victory-overlay' id='victoryScreen'>
+      <div class='victory-bg' style='background-image: url(data:image/png;base64,$bgBase64);'></div>
+      <div class='victory-content'>
+        <div class='victory-crown'>&#128081;</div>
+        <div class='victory-title'>TOURNAMENT CHAMPION</div>
+        $portraitImg
+        <div class='victory-name'>$champName</div>
+        <div class='victory-record'>$champWins WINS - 0 LOSSES</div>
+        <div class='victory-subtitle'>UNDEFEATED</div>
+      </div>
+      <div class='victory-scanlines'></div>
+    </div>
+"@
     }
 
     $html = @"
@@ -584,6 +709,111 @@ function Update-HtmlBracket($rounds, [int]$activeRound = -1, [int]$activeMatch =
     color: #555;
     margin-top: 20px;
     font-size: 0.8em;
+  }
+  /* Victory screen */
+  .victory-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: victoryFadeIn 1.5s ease-out;
+  }
+  .victory-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+  }
+  .victory-scanlines {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none;
+  }
+  .victory-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 40px 60px;
+    background: rgba(0, 0, 0, 0.65);
+    border: 3px solid #f0c040;
+    border-radius: 16px;
+    box-shadow: 0 0 60px rgba(240, 192, 64, 0.4), inset 0 0 30px rgba(0,0,0,0.5);
+    animation: victoryPulse 3s ease-in-out infinite;
+  }
+  .victory-crown {
+    font-size: 4em;
+    margin-bottom: 10px;
+    animation: crownBounce 2s ease-in-out infinite;
+  }
+  .victory-title {
+    font-size: 1.4em;
+    color: #e94560;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-shadow: 0 0 15px rgba(233, 69, 96, 0.7);
+  }
+  .champ-portrait {
+    max-width: 200px;
+    max-height: 250px;
+    margin: 15px auto;
+    display: block;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 20px rgba(240, 192, 64, 0.6));
+    border: 2px solid #f0c040;
+    border-radius: 8px;
+  }
+  .victory-name {
+    font-size: 3.5em;
+    color: #f0c040;
+    font-weight: bold;
+    text-shadow: 0 0 30px rgba(240, 192, 64, 0.8), 0 4px 8px rgba(0,0,0,0.8);
+    letter-spacing: 4px;
+    margin: 15px 0;
+    animation: nameGlow 2s ease-in-out infinite alternate;
+  }
+  .victory-record {
+    font-size: 1.6em;
+    color: #2ecc71;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+    margin-bottom: 8px;
+  }
+  .victory-subtitle {
+    font-size: 1.1em;
+    color: #e94560;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+  @keyframes victoryFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes victoryPulse {
+    0%, 100% { box-shadow: 0 0 60px rgba(240, 192, 64, 0.4), inset 0 0 30px rgba(0,0,0,0.5); }
+    50% { box-shadow: 0 0 80px rgba(240, 192, 64, 0.6), inset 0 0 30px rgba(0,0,0,0.5); }
+  }
+  @keyframes crownBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes nameGlow {
+    from { text-shadow: 0 0 30px rgba(240, 192, 64, 0.8), 0 4px 8px rgba(0,0,0,0.8); }
+    to { text-shadow: 0 0 50px rgba(240, 192, 64, 1), 0 0 80px rgba(233, 69, 96, 0.4), 0 4px 8px rgba(0,0,0,0.8); }
   }
 </style>
 </head>

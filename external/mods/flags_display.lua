@@ -25,6 +25,19 @@ local LOCALCOORD_W = 500
 local LOCALCOORD_H = 240
 local GROUND_Y = 200           -- approximate ground line in screen localcoord space
 local labelFont = nil
+local vsFont = nil
+local vsText = nil
+local vsInitialized = false
+
+-- TikTok rules display
+local rulesFont = nil
+local rulesInitialized = false
+local rulesLines = {}
+
+-- VS banner position (top center of screen)
+local VS_BANNER_Y =200
+
+local VS_BANNER_SCALE = 3
 
 -- Orb positions (where the yellow balls are in the HUD)
 -- fight.def [Face]: p1.pos=2,12  p2.pos=316,12
@@ -103,6 +116,17 @@ local function initFight()
 	p1Label = createLabel(c1.code)
 	p2Label = createLabel(c2.code)
 
+	-- Create VS banner text: "Country1  VS  Country2"
+	if vsFont == nil then
+		vsFont = fontNew("font/f-6x9.def")
+	end
+	vsText = textImgNew()
+	textImgSetFont(vsText, vsFont)
+	textImgSetText(vsText, string.upper(c1.name) .. "  VS  " .. string.upper(c2.name))
+	textImgSetScale(vsText, VS_BANNER_SCALE, VS_BANNER_SCALE)
+	textImgSetAlign(vsText, 0)  -- center align
+	vsInitialized = true
+
 	print("[Flags] P1: " .. c1.name .. " (" .. c1.code .. ")")
 	print("[Flags] P2: " .. c2.name .. " (" .. c2.code .. ")")
 	initialized = true
@@ -141,10 +165,69 @@ local function drawFloatingFlag(flagData, pn)
 	animDraw(flagData.floatAnim)
 end
 
+-- Draw the "Country VS Country" banner at top center
+local function drawVsBanner()
+	if not vsInitialized or vsText == nil then return end
+	-- Center the text on screen (1280 wide -> center = 640)
+	textImgSetPos(vsText, 640, VS_BANNER_Y)
+	textImgDraw(vsText)
+end
+
+-- Initialize TikTok rules text objects
+local RULES_Y_START = VS_BANNER_Y + 30  -- below the VS banner
+local RULES_SCALE = 1.5
+local RULES_LINE_SPACING = 16
+
+local function initRules()
+	if rulesInitialized then return end
+	if rulesFont == nil then
+		rulesFont = fontNew("font/f-6x9.def")
+	end
+
+	-- Compact emoji-style rules using ASCII symbols
+	-- <3 = Like/Heart, @ = Rose, * = Buff star, # = God mode, ^ = Hammer
+	local ruleTexts = {
+		"<3 LIKE = +1 HP BOTH",
+		"-- P1 --              -- P2 --",
+		"@1 ROSE = +1HP     @1 GG = +1HP",
+		"*1 F.HEART = BUFF  *1 OVERREACT = BUFF",
+		"#10 ROSA = GOD     #10 NECKLACE = GOD",
+		">>> SHARE/REPOST = HAMMER DROP <<<",
+	}
+
+	rulesLines = {}
+	for i, text in ipairs(ruleTexts) do
+		local t = textImgNew()
+		textImgSetFont(t, rulesFont)
+		textImgSetText(t, text)
+		textImgSetScale(t, RULES_SCALE, RULES_SCALE)
+		textImgSetAlign(t, 0) -- center
+		table.insert(rulesLines, t)
+	end
+	rulesInitialized = true
+end
+
+local function drawRules()
+	if not rulesInitialized then
+		initRules()
+	end
+	local barTop = VS_BANNER_Y - 37
+	local barBottom = RULES_Y_START + (#rulesLines - 1) * RULES_LINE_SPACING + 10
+	fillRect(350, barTop, 650, barBottom, 0, 0, 0, 180, 0)
+	for i, line in ipairs(rulesLines) do
+		local y = RULES_Y_START + (i - 1) * RULES_LINE_SPACING
+		textImgSetPos(line, 640, y)
+		textImgDraw(line)
+	end
+end
+
 -- Hook into the match loop
 hook.add("loop", "flags_display", function()
 	if roundstart() and roundno() == 1 then
 		initialized = false
+		vsInitialized = false
+		rulesInitialized = false
+		rulesLines = {}
 	end
 
 	if not initialized then
@@ -154,6 +237,12 @@ hook.add("loop", "flags_display", function()
 	-- Draw circular flags over the orbs
 	drawOrbFlag(p1Flag, 1)
 	drawOrbFlag(p2Flag, 2)
+
+	-- Draw country VS country text banner
+	drawVsBanner()
+
+	-- Draw TikTok rules below VS banner
+	drawRules()
 
 	-- Draw floating flags above characters (disabled for now)
 	--drawFloatingFlag(p1Flag, 1)

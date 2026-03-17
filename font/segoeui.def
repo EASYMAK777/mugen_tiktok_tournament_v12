@@ -1,0 +1,12 @@
+[FNT v2]
+fntversion = 2,00
+name = "Segoe UI"
+author = "Microsoft"
+
+[Def]
+Type = truetype
+Size = 10,20
+Spacing = 1,1
+Offset = 0,0
+File = segoeui.ttf
+Blend = 1

@@ -213,7 +213,7 @@ local function drawRules()
 	end
 	local barTop = VS_BANNER_Y - 37
 	local barBottom = RULES_Y_START + (#rulesLines - 1) * RULES_LINE_SPACING + 10
-	fillRect(350, barTop, 650, barBottom, 0, 0, 0, 180, 0)
+	fillRect(415, barTop, 455, barBottom, 0, 0, 0, 180, 0)
 	for i, line in ipairs(rulesLines) do
 		local y = RULES_Y_START + (i - 1) * RULES_LINE_SPACING
 		textImgSetPos(line, 640, y)
@@ -238,11 +238,9 @@ hook.add("loop", "flags_display", function()
 	drawOrbFlag(p1Flag, 1)
 	drawOrbFlag(p2Flag, 2)
 
-	-- Draw country VS country text banner
-	drawVsBanner()
-
-	-- Draw TikTok rules below VS banner
+	-- Draw rules first (box background), then VS text on top
 	drawRules()
+	drawVsBanner()
 
 	-- Draw floating flags above characters (disabled for now)
 	--drawFloatingFlag(p1Flag, 1)
